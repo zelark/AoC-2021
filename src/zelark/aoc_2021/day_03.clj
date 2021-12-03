@@ -11,42 +11,34 @@
   (Long/parseLong s 2))
 
 ;; part 1
-(let [gamma-rate (->> (str/split-lines input)
-                      (apply map #(frequencies %&))
-                      (map (partial sort-by (juxt second first)))
-                      (map ffirst)
-                      (apply str))
-      epsilon-rate (str/escape gamma-rate {\0 \1 \1 \0})]
-  (* (parse-bin gamma-rate)
-     (parse-bin epsilon-rate))) ; 1307354
+(->> (str/split-lines input)
+     (apply map #(->> (frequencies %&)
+                      (sort-by val)
+                      (map first)))
+     (apply map vector)
+     (map (comp parse-bin str/join))
+     (apply *)) ; 1307354
 
 ;; part 2
-(defn most-common-bit [numbers n]
-  (->> (map #(nth % n) numbers)
-       (frequencies)
-       (sort-by (juxt second first))
-       ((comp first second))))
-
-(defn least-common-bit [numbers n]
-  (->> (map #(nth % n) numbers)
-       (frequencies)
-       (sort-by (juxt second first))
-       (ffirst)))
+(defn make-bit-fn [winner]
+  (fn common-bit [numbers n]
+    (->> (map #(nth % n) numbers)
+         (frequencies)
+         (sort-by (juxt second first))
+         (winner))))
 
 (defn find-rating [numbers bit-fn]
-  (-> (reduce (fn [acc i]
-                (let [bit (bit-fn acc i)
-                      ret (filter #(= (nth % i) bit) acc)]
-                  (if (== (count ret) 1)
-                    (reduced ret)
-                    ret)))
+  (-> (reduce (fn [acc n]
+                (if (== (count acc) 1)
+                  (reduced acc)
+                  (let [bit (bit-fn acc n)]
+                    (filter #(= (nth % n) bit) acc))))
               numbers
               (range (count (first numbers))))
       (first)))
 
-(let [numbers (str/split-lines input)
-      o2-rating (find-rating numbers most-common-bit)
-      co2-rating (find-rating numbers least-common-bit)]
+(let [numbers    (str/split-lines input)
+      o2-rating  (find-rating numbers (make-bit-fn (comp first second)))
+      co2-rating (find-rating numbers (make-bit-fn ffirst))]
   (* (parse-bin o2-rating)
      (parse-bin co2-rating))) ; 482500
-
