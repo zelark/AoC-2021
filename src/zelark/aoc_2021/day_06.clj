@@ -27,3 +27,18 @@
 (->> (parse-input input)
      (map (partial count-fish 256))
      (reduce +)) ; 1757714216975
+
+;; A solution I borrow from @mchampine and adapted a bit.
+(defn step [state]
+  (-> (mapv state [1 2 3 4 5 6 7 8 0])
+      (update 6 (fnil + 0 0) (get state 0))))
+
+(defn calc-fish [input days]
+  (->> (frequencies input)
+       (iterate step)
+       (drop days)
+       (first)
+       (reduce +)))
+
+(calc-fish (parse-input input) 80)
+(calc-fish (parse-input input) 256)
