@@ -32,7 +32,7 @@
 (solve identity input) ; 364898
 
 ;; part 2
-(defn fuel [n]
+(defn fuel [n]         ; 1 + 2 + 3 + … + n  == n * (n + 1) / 2
   (/ (* n (inc n)) 2)) ; thanks @mikelis for this math ^_^.
 
 (solve fuel input) ; 104149091
