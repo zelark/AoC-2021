@@ -1,79 +1,67 @@
 (ns zelark.aoc-2021.day-08
   (:require [zelark.aoc.core :as aoc]
-            [clojure.string :as str]
-            [clojure.set :as set]))
+            [clojure.string :as str]))
 
 ;; --- Day 8: Seven Segment Search ---
 ;; https://adventofcode.com/2021/day/8
 
 (def input (aoc/get-input 2021 8))
 
-(defn parse-entry [e]
-  (let [[patterns digits] (->> (re-seq #"[abcdefg]+" e)
-                               (split-at 10))]
-    [(set (map set patterns))
-     (mapv set digits)]))
+(defn parse-entry [entry]
+  (->> (re-seq #"[abcdefg]+" entry)
+       (split-at 10)))
 
  (defn parse-input [input]
    (->> (str/split-lines input)
         (map parse-entry)))
 
+(defn unique? [code]
+  (contains? #{2 3 4 7} (count code)))
+
 ;; part 1
 (->> (parse-input input)
-     (map #(->> % second (map count)))
-     (flatten)
-     (filter #{2 3 4 7})
+     (mapcat second)
+     (filter unique?)
      (count)) ; 532
 
 ;; part 2
-(defn find-1478 [ps]
-  (reduce (fn [m p]
-            (condp == (count p)
-              2 (assoc m 1 p)
-              3 (assoc m 7 p)
-              4 (assoc m 4 p)
-              7 (assoc m 8 p)
-              m))
-          {}
-          ps))
+(def segments->digit
+  {#{\a \b \c \e \f \g}    0
+   #{\c \f}                1
+   #{\a \c \d \e \g}       2
+   #{\a \c \d \f \g}       3
+   #{\b \c \d \f}          4
+   #{\a \b \d \f \g}       5
+   #{\a \b \d \e \f \g}    6
+   #{\a \c \f}             7
+   #{\a \b \c \d \e \f \g} 8
+   #{\a \b \c \d \f \g}    9})
 
-(defn find-9 [m ps]
-  (let [[nine] (filter #(set/subset? (m 4) %) ps)]
-    (assoc m 9 nine)))
+(def match->segment
+  {[2 6] \a
+   [2 4] \b
+   [4 4] \c
+   [2 5] \d
+   [1 3] \e
+   [4 5] \f
+   [1 6] \g})
 
-(defn find-03 [m ps]
-  (let [[three zero] (->> (filter #(set/subset? (m 1) %) ps)
-                          (sort-by count))]
-    (assoc m
-           0 zero
-           3 three)))
+(defn decode-digit [mapping digit]
+  (get segments->digit
+       (set (map mapping digit))))
 
-(defn find-6 [m ps]
-  (let [[six] (filter #(== (count %) 6) ps)]
-    (assoc m 6 six)))
-
-(defn find-25 [m ps]
-  (let [seg  (set/difference (m 8) (m 9))
-        two  (first (filter #(set/subset? seg %) ps))
-        five (first (disj ps two))]
-    (assoc m
-           2 two
-           5 five)))
-
-(defn calc-entry [entry]
-  (let [[patterns digits] entry
-        mapping  (find-1478 patterns)
-        patterns (apply disj patterns (vals mapping))
-        mapping  (find-9 mapping patterns)
-        patterns (apply disj patterns (vals mapping))
-        mapping  (find-03 mapping patterns)
-        patterns (apply disj patterns (vals mapping))
-        mapping  (find-6 mapping patterns)
-        patterns (apply disj patterns (vals mapping))
-        mapping  (find-25 mapping patterns)
-        mapping  (set/map-invert mapping)]
-    (reduce #(+ (* %1 10) (mapping %2)) 0 digits)))
+(defn decode-entry [[patterns digits]]
+  (let [{unique true others false} (group-by unique? patterns)
+        freqs1 (frequencies (str/join unique))
+        freqs2 (frequencies (str/join others))
+        mapping (reduce-kv (fn [m seg n]
+                             (assoc m seg (match->segment [n (freqs2 seg)])))
+                           {}
+                           freqs1)]
+    (->> (map #(decode-digit mapping %) digits)
+         (str/join)
+         (parse-long))))
 
 (->> (parse-input input)
-     (map calc-entry)
+     (map decode-entry)
      (reduce +)) ; 1011284
