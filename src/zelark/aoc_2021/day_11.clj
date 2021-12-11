@@ -24,24 +24,19 @@
                (update-vals inc)
                (update current :assoc 0)))))
 
-(defn find-full [full flashed state]
-  (reduce-kv (fn [f k v]
-               (if (and (not (flashed k))
-                        (>= v 10))
-                 (conj f k)
-                 f))
-             full
-             state))
+(defn find-full [state]
+  (->> (filter (fn [[_ v]] (>= v 10)) state)
+       (keys)))
 
 (defn step [[state n]]
   (loop [state (update-vals state inc)
          flashed #{}
-         full (find-full #{} flashed state)]
+         full (set (find-full state))]
     (if-let [current (first full)]
       (let [state'   (flash state flashed current)
             flashed' (conj flashed current)
-            full'    (-> (disj full current)
-                         (find-full flashed' state'))]
+            full'    (into (disj full current)
+                           (find-full state'))]
         (recur state' flashed' full'))
       [state (+ n (count flashed))])))
 
@@ -51,7 +46,6 @@
      (drop 100)
      (first)
      (second)) ; 1719
-
 
 ;; part 2
 (defn async? [[state]]
