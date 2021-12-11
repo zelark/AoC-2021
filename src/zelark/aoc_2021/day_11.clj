@@ -16,42 +16,33 @@
   (for [dx [-1 0 1] dy [-1 0 1] :when (not= dx dy 0)]
     [(+ x dx) (+ y dy)]))
 
-(defn flash [state flashed current]
-  (let [adjacent-octopuses (->> (adjacent current)
-                                (remove flashed))]
-    (merge state
-           (-> (select-keys state adjacent-octopuses)
-               (update-vals inc)
-               (update current :assoc 0)))))
+(defn flash [state flashed full]
+  (let [update-state (fn [m k v] (cond-> m (contains? m k) (update k + v)))
+        affected (->> (mapcat adjacent full)
+                      (remove flashed)
+                      (frequencies)
+                      (reduce-kv update-state state))]
+    (merge affected (zipmap full (repeat 0)))))
 
 (defn find-full [state]
-  (->> (filter (fn [[_ v]] (>= v 10)) state)
+  (->> (filter #(<= 10 (second %)) state)
        (keys)))
 
 (defn step [[state n]]
   (loop [state (update-vals state inc)
-         flashed #{}
-         full (set (find-full state))]
-    (if-let [current (first full)]
-      (let [state'   (flash state flashed current)
-            flashed' (conj flashed current)
-            full'    (into (disj full current)
-                           (find-full state'))]
-        (recur state' flashed' full'))
+         flashed #{}]
+    (if-let [full (seq (find-full state))]
+      (recur (flash state flashed full)
+             (into flashed full))
       [state (+ n (count flashed))])))
 
+(def steps (iterate step [(parse-input input) 0]))
+
 ;; part 1
-(->> [(parse-input input) 0]
-     (iterate step)
-     (drop 100)
-     (first)
-     (second)) ; 1719
+(second (nth steps 100)) ; 1719
 
 ;; part 2
 (defn async? [[state]]
   (some pos? (vals state)))
 
-(->> [(parse-input input) 0]
-     (iterate step)
-     (take-while async?)
-     (count)) ; 232
+(count (take-while async? steps)) ; 232
