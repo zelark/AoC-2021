@@ -7,3 +7,21 @@
       (io/resource)
       (slurp)
       (str/trim-newline)))
+
+;; Parsing
+(defn parse-longs [s]
+  (->> (re-seq #"\d+" s)
+       (map parse-long)))
+
+;; Grids
+
+(defn empty-grid [w h]
+  (vec (repeat h (vec (repeat w \.)))))
+
+(defn print-grid [grid]
+  (->> (map str/join grid)
+       (str/join \newline)
+       (println)))
+
+(defn mark-point [grid [x y] v]
+  (assoc-in grid [y x] v))
