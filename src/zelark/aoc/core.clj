@@ -25,3 +25,11 @@
 
 (defn mark-point [grid [x y] v]
   (assoc-in grid [y x] v))
+
+(defn print-points [points]
+  (let [max-x (apply max (map first points))
+        max-y (apply max (map second points))]
+    (-> (reduce #(mark-point %1 %2 \#)
+                (empty-grid (inc max-x) (inc max-y))
+                points)
+        (print-grid))))
