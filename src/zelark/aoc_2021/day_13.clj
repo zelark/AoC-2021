@@ -25,16 +25,10 @@
                (map (fn [[x y]] [x (- y (* (- y n) 2))]) bottom)))))
 
 ;; part 1
-(let [[dots [finst]] (parse-input input)
-      dots' (fold dots finst)]
-  (count dots')) ; 759
+(let [[dots [first-instuction]] (parse-input input)]
+  (count (fold dots first-instuction))) ; 759
 
 ;; part 2
-(let [[dots instructions] (parse-input input)
-      dots' (reduce #(fold %1 %2) dots instructions)
-      max-x (apply max (map first dots'))
-      max-y (apply max (map second dots'))]
-  (-> (reduce #(aoc/mark-point %1 %2 \#)
-              (aoc/empty-grid (inc max-x) (inc max-y))
-              dots')
-      (aoc/print-board))) ; HECRZKPR
+(let [[dots instructions] (parse-input input)]
+  (-> (reduce fold dots instructions)
+      (aoc/print-points))) ; HECRZKPR
