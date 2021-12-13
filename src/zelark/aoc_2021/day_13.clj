@@ -15,14 +15,17 @@
      (->> (re-seq #"(x|y)=(\d+)" instructions)
           (map (fn [[_ axis n]] [(keyword axis) (parse-long n)])))]))
 
+(defn offset [c n]
+  (- c (* (- c n) 2)))
+
 (defn fold [dots [axis n]]
-  (case axis
-    :x (let [{right false left true} (group-by (fn [[x _y]] (< x n)) dots)]
-         (into (set left)
-               (map (fn [[x y]] [(- x (* (- x n) 2)) y]) right)))
-    :y (let [{bottom false up true} (group-by (fn [[_x y]] (< y n)) dots)]
-         (into (set up)
-               (map (fn [[x y]] [x (- y (* (- y n) 2))]) bottom)))))
+  (reduce (fn [acc [x y :as dot]]
+            (conj acc
+                  (case axis
+                    :x (if (< x n) dot [(offset x n) y])
+                    :y (if (< y n) dot [x (offset y n)]))))
+          #{}
+          dots))
 
 ;; part 1
 (let [[dots [first-instuction]] (parse-input input)]
