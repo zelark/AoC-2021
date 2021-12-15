@@ -31,7 +31,7 @@
         start [0 0]
         risk-map* (memoize
                    (fn [[x y]]
-                     (nth (iterate #(if (== % 9) 1 (inc %))
+                     (nth (iterate #(inc (mod % 9))
                                    (risk-map [(mod x max-x) (mod y max-y)]))
                           (manhattan-distance start [(quot x max-x) (quot y max-y)]))))
         graph (fn [n]
