@@ -79,10 +79,10 @@
        (reduce #(if (= %1 %2) (reduced %1) %2))))
 
 (defn calc-magnitude [fish-number]
-  (if (number? fish-number)
-    fish-number
+  (if (vector? fish-number)
     (+ (* 3 (calc-magnitude (first fish-number)))
-       (* 2 (calc-magnitude (second fish-number))))))
+       (* 2 (calc-magnitude (second fish-number))))
+    fish-number))
 
 ;; part 1
 (->> (parse-input input)
