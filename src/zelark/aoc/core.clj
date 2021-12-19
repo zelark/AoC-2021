@@ -10,11 +10,10 @@
 
 ;; Parsing
 (defn parse-longs [s]
-  (->> (re-seq #"\d+" s)
-       (map parse-long)))
+  (->> (re-seq #"-?\d+" s)
+       (mapv parse-long)))
 
 ;; Grids
-
 (defn empty-grid [w h]
   (vec (repeat h (vec (repeat w \.)))))
 
