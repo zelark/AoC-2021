@@ -13,6 +13,9 @@
   (->> (re-seq #"-?\d+" s)
        (mapv parse-long)))
 
+(defn parse-bin [s]
+  (Long/parseLong s 2))
+
 ;; Grids
 (defn empty-grid [w h]
   (vec (repeat h (vec (repeat w \.)))))
