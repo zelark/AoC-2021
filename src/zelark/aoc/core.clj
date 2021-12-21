@@ -16,6 +16,12 @@
 (defn parse-bin [s]
   (Long/parseLong s 2))
 
+;; Math
+(defn mod-1
+  "Returns the 1-based modulus `base` of `n`"
+  [n base]
+  (inc (mod (dec n) base)))
+
 ;; Grids
 (defn empty-grid [w h]
   (vec (repeat h (vec (repeat w \.)))))
