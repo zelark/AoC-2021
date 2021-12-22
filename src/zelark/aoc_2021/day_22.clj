@@ -57,4 +57,4 @@
 (solve input [-50 50]) ; 503864
 
 ;; part 2
-(solve input nil) ; 1255547543528356
+(time (solve input)) ; 1255547543528356
