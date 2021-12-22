@@ -27,7 +27,7 @@
 (defn clip [steps windows]
   (keep (fn [[state ranges]]
           (let [os (map overlap ranges windows)]
-            (when-not (some empty? os)
+            (when (every? seq os)
               [state os])))
         steps))
 
@@ -46,12 +46,12 @@
    (loop [result 0
           steps  (cond-> (parse-input input)
                    window (clip (repeat 3 window)))]
-     (if-let [step (first steps)]
-       (if (= (first step) :off)
-         (recur result (next steps))
-         (recur (+ result (calc-cubes step (next steps)))
-                (next steps)))
-       result))))
+     (let [[state _ :as step] (first steps)]
+       (cond
+         (nil? step)    result
+         (= state :off) (recur result (next steps))
+         :else          (recur (+ result (calc-cubes step (next steps)))
+                               (next steps)))))))
 
 ;; part 1
 (solve input [-50 50]) ; 503864
