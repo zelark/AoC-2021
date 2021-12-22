@@ -22,6 +22,13 @@
   [n base]
   (inc (mod (dec n) base)))
 
+(defn rangex
+  ([] ())
+  ([start end]
+   (if (<= start end)
+     (range start (inc end))
+     (range start (dec end) -1))))
+
 ;; Grids
 (defn empty-grid [w h]
   (vec (repeat h (vec (repeat w \.)))))
