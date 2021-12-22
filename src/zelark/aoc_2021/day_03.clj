@@ -7,16 +7,13 @@
 
 (def input (aoc/get-input 2021 03))
 
-(defn parse-bin [s]
-  (Long/parseLong s 2))
-
 ;; part 1
 (->> (str/split-lines input)
      (apply map #(->> (frequencies %&)
                       (sort-by val)
                       (map first)))
      (apply map vector)
-     (map (comp parse-bin str/join))
+     (map (comp aoc/parse-bin str/join))
      (apply *)) ; 1307354
 
 ;; part 2
@@ -40,5 +37,5 @@
 (let [numbers    (str/split-lines input)
       o2-rating  (find-rating numbers (make-bit-fn (comp first second)))
       co2-rating (find-rating numbers (make-bit-fn ffirst))]
-  (* (parse-bin o2-rating)
-     (parse-bin co2-rating))) ; 482500
+  (* (aoc/parse-bin o2-rating)
+     (aoc/parse-bin co2-rating))) ; 482500

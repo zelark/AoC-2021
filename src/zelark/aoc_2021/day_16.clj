@@ -15,9 +15,6 @@
                \8 "1000" \9 "1001" \A "1010" \B "1011"
                \C "1100" \D "1101" \E "1110" \F "1111"}))
 
-(defn parse-bin [s]
-  (Long/parseLong s 2))
-
 (defn read-trn! [buf n]
   (let [trn (deref buf)
         ret (subs trn 0 n)
@@ -25,22 +22,22 @@
     ret))
 
 (defn read-header [trn]
-  {:version (parse-bin (read-trn! trn 3))
-   :type-id (parse-bin (read-trn! trn 3))})
+  {:version (aoc/parse-bin (read-trn! trn 3))
+   :type-id (aoc/parse-bin (read-trn! trn 3))})
 
 (defn read-groups [trn]
   (loop [bin ""]
-    (if (zero? (parse-bin (read-trn! trn 1)))
-      (parse-bin (str bin (read-trn! trn 4)))
+    (if (zero? (aoc/parse-bin (read-trn! trn 1)))
+      (aoc/parse-bin (str bin (read-trn! trn 4)))
       (recur (str bin (read-trn! trn 4))))))
 
 (defn read-packet [trn]
   (let [{:keys [type-id] :as packet} (read-header trn)]
     (if (== type-id 4)
       (assoc packet :number (read-groups trn))
-      (let [length-type-id (parse-bin (read-trn! trn 1))]
+      (let [length-type-id (aoc/parse-bin (read-trn! trn 1))]
         (case length-type-id
-          0 (let [number-of-bits (parse-bin (read-trn! trn 15))]
+          0 (let [number-of-bits (aoc/parse-bin (read-trn! trn 15))]
               (assoc packet
                      :sub-packets
                      (let [bits   (read-trn! trn number-of-bits)
@@ -49,7 +46,7 @@
                          (if (seq @trn-in)
                            (recur (conj sub-packets (read-packet trn-in)))
                            sub-packets)))))
-          1 (let [number-of-sub-packets (parse-bin (read-trn! trn 11))]
+          1 (let [number-of-sub-packets (aoc/parse-bin (read-trn! trn 11))]
               (assoc packet
                      :sub-packets
                      (doall (repeatedly number-of-sub-packets #(read-packet trn))))))))))
@@ -79,9 +76,9 @@
   (let [{:keys [type-id] :as packet} (read-header trn)]
     (if (== type-id 4)
       (read-groups trn)
-      (let [length-type-id (parse-bin (read-trn! trn 1))]
+      (let [length-type-id (aoc/parse-bin (read-trn! trn 1))]
         (case length-type-id
-          0 (let [number-of-bits (parse-bin (read-trn! trn 15))]
+          0 (let [number-of-bits (aoc/parse-bin (read-trn! trn 15))]
               (apply list
                      (type->op type-id)
                      (let [bits   (read-trn! trn number-of-bits)
@@ -90,7 +87,7 @@
                          (if (seq @trn-in)
                            (recur (conj sub-packets (read-packet-2 trn-in)))
                            sub-packets)))))
-          1 (let [number-of-sub-packets (parse-bin (read-trn! trn 11))]
+          1 (let [number-of-sub-packets (aoc/parse-bin (read-trn! trn 11))]
               (apply list
                      (type->op type-id)
                      (repeatedly number-of-sub-packets #(read-packet-2 trn)))))))))
