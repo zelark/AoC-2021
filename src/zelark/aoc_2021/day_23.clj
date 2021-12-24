@@ -5,6 +5,9 @@
 
 ;; Someone did https://amphipod.net/ an interactive game.
 
+;; good thoughts about the problem
+;; https://old.reddit.com/r/adventofcode/comments/rn79s3/2021_day_23_mathematical_analysis_of_my_input_and/
+
 ;; part 1
 ["#############"
  "#...........#"
